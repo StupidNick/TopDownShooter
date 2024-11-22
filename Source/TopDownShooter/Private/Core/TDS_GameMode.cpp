@@ -1,5 +1,3 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
-
 #include "TDS_GameMode.h"
 #include "UObject/ConstructorHelpers.h"
 
