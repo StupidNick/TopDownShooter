@@ -4,6 +4,9 @@
 #include "GameFramework/Character.h"
 #include "TDS_Character.generated.h"
 
+class UCameraComponent;
+class USpringArmComponent;
+
 UCLASS(Blueprintable)
 class ATDS_Character : public ACharacter
 {
@@ -14,14 +17,16 @@ public:
 
 	virtual void Tick(float DeltaSeconds) override;
 
-	FORCEINLINE class UCameraComponent* GetTopDownCameraComponent() const { return TopDownCameraComponent; }
-	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
+	// UFUNCTION()
+
+	FORCEINLINE UCameraComponent* GetTopDownCameraComponent() const { return TopDownCameraComponent; }
+	FORCEINLINE USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	class UCameraComponent* TopDownCameraComponent;
+	UCameraComponent* TopDownCameraComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	class USpringArmComponent* CameraBoom;
+	USpringArmComponent* CameraBoom;
 };
 

@@ -4,7 +4,7 @@
 #include "GameFramework/GameModeBase.h"
 #include "TDS_GameMode.generated.h"
 
- UCLASS(minimalapi)
+UCLASS(minimalapi)
 class ATDS_GameMode : public AGameModeBase
 {
 	GENERATED_BODY()
