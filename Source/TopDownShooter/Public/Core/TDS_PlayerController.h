@@ -25,7 +25,8 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
 
-	void OnClick();
+	void OnMousePressed();
+	void OnMouseReleased();
 	void OnMoveForwardPressed(const FInputActionValue& Input);
 
 	void UpdateCharacterRotation() const;
@@ -36,7 +37,7 @@ public:
 	UInputMappingContext* DefaultMappingContext;
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
-	UInputAction* ClickAction;
+	UInputAction* MouseClickAction;
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	UInputAction* MoveForwardAction;
 

@@ -1,10 +1,12 @@
 #include "TDS_Character.h"
+#include "TDS_EquipmentComponent.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
-#include "Kismet/KismetMathLibrary.h"
+
+
 
 ATDS_Character::ATDS_Character()
 {
@@ -30,13 +32,10 @@ ATDS_Character::ATDS_Character()
 	TopDownCameraComponent->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	TopDownCameraComponent->bUsePawnControlRotation = false;
 
+	EquipmentComponent = CreateDefaultSubobject<UTDS_EquipmentComponent>(TEXT("EquipmentComponent"));
+
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
-}
-
-void ATDS_Character::Tick(float DeltaSeconds)
-{
-    Super::Tick(DeltaSeconds);
 }
 
 void ATDS_Character::Move(FVector2d InDirection) const
@@ -54,6 +53,20 @@ void ATDS_Character::UpdateRotation_Implementation(const FRotator& InTargetRotat
 {
 	const FRotator CurrentRotator = GetActorRotation();
 	SetActorRotation(FRotator(CurrentRotator.Pitch, InTargetRotator.Yaw, CurrentRotator.Roll));
+}
+
+void ATDS_Character::OnMousePressed_Implementation()
+{
+	if (!EquipmentComponent) return;
+
+	EquipmentComponent->OnMousePressed();
+}
+
+void ATDS_Character::OnMouseReleased_Implementation()
+{
+	if (!EquipmentComponent) return;
+
+	EquipmentComponent->OnMouseReleased();
 }
 
 UCameraComponent* ATDS_Character::GetCamera() const 

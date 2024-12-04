@@ -53,14 +53,24 @@ void ATDS_PlayerController::SetupInputComponent()
 
 	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(InputComponent))
 	{
-		EnhancedInputComponent->BindAction(ClickAction, ETriggerEvent::Started, this, &ATDS_PlayerController::OnClick);
+		EnhancedInputComponent->BindAction(MouseClickAction, ETriggerEvent::Started, this, &ATDS_PlayerController::OnMousePressed);
+		EnhancedInputComponent->BindAction(MouseClickAction, ETriggerEvent::Completed, this, &ATDS_PlayerController::OnMouseReleased);
 		EnhancedInputComponent->BindAction(MoveForwardAction, ETriggerEvent::Triggered, this, &ATDS_PlayerController::OnMoveForwardPressed);
 	}
 }
 
-void ATDS_PlayerController::OnClick()
+void ATDS_PlayerController::OnMousePressed()
 {
-	// TODO make click action 
+	if (!CurrentCharacter) return;
+
+	CurrentCharacter->OnMousePressed();
+}
+
+void ATDS_PlayerController::OnMouseReleased()
+{
+	if (!CurrentCharacter) return;
+
+	CurrentCharacter->OnMouseReleased();
 }
 
 void ATDS_PlayerController::OnMoveForwardPressed(const FInputActionValue& Input)
