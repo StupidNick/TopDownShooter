@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Templates/SubclassOf.h"
+#include "TDS_Character.h"
 #include "GameFramework/PlayerController.h"
 #include "TDS_PlayerController.generated.h"
 
@@ -23,9 +23,12 @@ protected:
 	virtual void SetupInputComponent() override;
 	
 	virtual void BeginPlay();
+	virtual void Tick(float DeltaSeconds) override;
 
-	UFUNCTION()
 	void OnClick();
+
+	void UpdateCharacterRotation();
+	
 public:
 	void OnMoveForwardPressed(const FInputActionValue& Input);
 	void OnInputStarted();
@@ -42,4 +45,9 @@ public:
 	UInputAction* MoveForwardAction;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
 	UInputAction* MoveRightAction;
+
+private:
+
+	UPROPERTY()
+	ATDS_Character* CurrentCharacter = nullptr;
 };

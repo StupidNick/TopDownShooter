@@ -23,6 +23,23 @@ void ATDS_PlayerController::BeginPlay()
 	{
 		Subsystem->AddMappingContext(DefaultMappingContext, 0);
 	}
+	CurrentCharacter = Cast<ATDS_Character>(GetCharacter());
+}
+
+void ATDS_PlayerController::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	UpdateCharacterRotation();
+}
+
+void ATDS_PlayerController::UpdateCharacterRotation()
+{
+	if (!CurrentCharacter) return;
+	
+	FVector WorldLocation, WorldDirection;
+	DeprojectMousePositionToWorld(WorldLocation, WorldDirection);
+	CurrentCharacter->UpdateRotation(WorldLocation);
 }
 
 void ATDS_PlayerController::SetupInputComponent()
@@ -31,14 +48,6 @@ void ATDS_PlayerController::SetupInputComponent()
 
 	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(InputComponent))
 	{
-		if (HasAuthority())
-		{
-			UE_LOG(LogTemp, Error, TEXT("Server bind"));
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("Client bind"));
-		}
 		EnhancedInputComponent->BindAction(ClickAction, ETriggerEvent::Started, this, &ATDS_PlayerController::OnClick);
 		EnhancedInputComponent->BindAction(MoveForwardAction, ETriggerEvent::Triggered, this, &ATDS_PlayerController::OnMoveForwardPressed);
 	}
@@ -46,12 +55,15 @@ void ATDS_PlayerController::SetupInputComponent()
 
 void ATDS_PlayerController::OnClick()
 {
+	
 }
 
 void ATDS_PlayerController::OnMoveForwardPressed(const FInputActionValue& Input)
 {
-	FVector2d MovingVector = Input.Get<FVector2d>();
-	Cast<ATDS_Character>(GetCharacter())->GetMovementComponent()->AddInputVector(FVector(MovingVector.X, MovingVector.Y, 0));
+	if (!CurrentCharacter) return;
+	
+	const FVector2d MovingVector = Input.Get<FVector2d>();
+	CurrentCharacter->Move(MovingVector);
 }
 
 void ATDS_PlayerController::OnInputStarted()

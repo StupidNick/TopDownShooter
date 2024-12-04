@@ -17,10 +17,8 @@ public:
 
 	virtual void Tick(float DeltaSeconds) override;
 
-	// UFUNCTION()
-
-	FORCEINLINE UCameraComponent* GetTopDownCameraComponent() const { return TopDownCameraComponent; }
-	FORCEINLINE USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
+	void Move(FVector2d InDirection) const;
+	void UpdateRotation(const FVector& InMousePosition);
 
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))

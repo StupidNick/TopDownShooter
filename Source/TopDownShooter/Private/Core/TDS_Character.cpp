@@ -4,6 +4,7 @@
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 
 ATDS_Character::ATDS_Character()
 {
@@ -36,4 +37,29 @@ ATDS_Character::ATDS_Character()
 void ATDS_Character::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
+}
+
+void ATDS_Character::Move(FVector2d InDirection) const
+{
+	if (InDirection.X > 1)
+	{
+		InDirection.X = 1;
+	}
+	if (InDirection.Y > 1)
+	{
+		InDirection.Y = 1;
+	}
+	
+	if (const auto MovementComponent = GetMovementComponent())
+	{
+		MovementComponent->AddInputVector(FVector(InDirection.X, InDirection.Y, 0));
+	}
+}
+
+void ATDS_Character::UpdateRotation(const FVector& InMousePosition)
+{
+	UE_LOG(LogTemp, Error, TEXT("Current location: %s"), *InMousePosition.ToString()); //Think about rotation character
+	const FRotator RotatorToMousePosition = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), InMousePosition);
+	const FRotator CurrentRotator = GetActorRotation();
+	SetActorRotation(FRotator(CurrentRotator.Pitch, CurrentRotator.Yaw, RotatorToMousePosition.Roll));
 }
