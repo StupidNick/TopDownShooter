@@ -1,13 +1,10 @@
 #include "TDS_PlayerController.h"
 #include "GameFramework/Pawn.h"
-#include "Blueprint/AIBlueprintHelperLibrary.h"
-#include "NiagaraFunctionLibrary.h"
 #include "Engine/World.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "TDS_Character.h"
-#include "GameFramework/Character.h"
-#include "GameFramework/PawnMovementComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 
 ATDS_PlayerController::ATDS_PlayerController()
 {
@@ -33,13 +30,21 @@ void ATDS_PlayerController::Tick(float DeltaSeconds)
 	UpdateCharacterRotation();
 }
 
-void ATDS_PlayerController::UpdateCharacterRotation()
+void ATDS_PlayerController::UpdateCharacterRotation() const
 {
-	if (!CurrentCharacter) return;
+	if (!CurrentCharacter || !GetWorld()) return;
 	
 	FVector WorldLocation, WorldDirection;
 	DeprojectMousePositionToWorld(WorldLocation, WorldDirection);
-	CurrentCharacter->UpdateRotation(WorldLocation);
+
+	FHitResult Result;
+	GetWorld()->LineTraceSingleByChannel(Result, WorldLocation, WorldLocation + WorldDirection * 5000, MouseTraceChanel);
+	DrawDebugLine(GetWorld(), WorldLocation, WorldLocation + WorldDirection * 5000, FColor::Red);
+
+	if (Result.bBlockingHit)
+	{
+		CurrentCharacter->UpdateRotation(UKismetMathLibrary::FindLookAtRotation(CurrentCharacter->GetActorLocation(), Result.Location));
+	}
 }
 
 void ATDS_PlayerController::SetupInputComponent()
@@ -55,7 +60,7 @@ void ATDS_PlayerController::SetupInputComponent()
 
 void ATDS_PlayerController::OnClick()
 {
-	
+	// TODO make click action 
 }
 
 void ATDS_PlayerController::OnMoveForwardPressed(const FInputActionValue& Input)
@@ -64,9 +69,4 @@ void ATDS_PlayerController::OnMoveForwardPressed(const FInputActionValue& Input)
 	
 	const FVector2d MovingVector = Input.Get<FVector2d>();
 	CurrentCharacter->Move(MovingVector);
-}
-
-void ATDS_PlayerController::OnInputStarted()
-{
-	StopMovement();
 }

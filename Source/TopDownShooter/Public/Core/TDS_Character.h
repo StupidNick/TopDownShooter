@@ -18,13 +18,17 @@ public:
 	virtual void Tick(float DeltaSeconds) override;
 
 	void Move(FVector2d InDirection) const;
-	void UpdateRotation(const FVector& InMousePosition);
 
-private:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	UFUNCTION(Server, Unreliable)
+	void UpdateRotation(const FRotator& InTargetRotator);
+	void UpdateRotation_Implementation(const FRotator& InTargetRotator);
+
+	UCameraComponent* GetCamera() const;
+
+public:
+	UPROPERTY(EditDefaultsOnly, Category = "Camera")
 	UCameraComponent* TopDownCameraComponent;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, Category = "Camera")
 	USpringArmComponent* CameraBoom;
 };
-

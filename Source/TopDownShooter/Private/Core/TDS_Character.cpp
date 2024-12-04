@@ -41,14 +41,8 @@ void ATDS_Character::Tick(float DeltaSeconds)
 
 void ATDS_Character::Move(FVector2d InDirection) const
 {
-	if (InDirection.X > 1)
-	{
-		InDirection.X = 1;
-	}
-	if (InDirection.Y > 1)
-	{
-		InDirection.Y = 1;
-	}
+	InDirection.X = FMath::Max(InDirection.X, 1.);
+	InDirection.Y = FMath::Max(InDirection.Y, 1.);
 	
 	if (const auto MovementComponent = GetMovementComponent())
 	{
@@ -56,10 +50,13 @@ void ATDS_Character::Move(FVector2d InDirection) const
 	}
 }
 
-void ATDS_Character::UpdateRotation(const FVector& InMousePosition)
+void ATDS_Character::UpdateRotation_Implementation(const FRotator& InTargetRotator)
 {
-	UE_LOG(LogTemp, Error, TEXT("Current location: %s"), *InMousePosition.ToString()); //Think about rotation character
-	const FRotator RotatorToMousePosition = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), InMousePosition);
 	const FRotator CurrentRotator = GetActorRotation();
-	SetActorRotation(FRotator(CurrentRotator.Pitch, CurrentRotator.Yaw, RotatorToMousePosition.Roll));
+	SetActorRotation(FRotator(CurrentRotator.Pitch, InTargetRotator.Yaw, CurrentRotator.Roll));
+}
+
+UCameraComponent* ATDS_Character::GetCamera() const 
+{
+	return TopDownCameraComponent;
 }

@@ -22,29 +22,26 @@ protected:
 
 	virtual void SetupInputComponent() override;
 	
-	virtual void BeginPlay();
+	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
 
 	void OnClick();
-
-	void UpdateCharacterRotation();
-	
-public:
 	void OnMoveForwardPressed(const FInputActionValue& Input);
-	void OnInputStarted();
+
+	void UpdateCharacterRotation() const;
 
 public:
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	UInputMappingContext* DefaultMappingContext;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	UInputAction* ClickAction;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input)
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	UInputAction* MoveForwardAction;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
-	UInputAction* MoveRightAction;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	TEnumAsByte<ECollisionChannel> MouseTraceChanel;
 
 private:
 
