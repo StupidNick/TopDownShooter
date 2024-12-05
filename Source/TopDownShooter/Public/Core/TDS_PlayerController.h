@@ -1,10 +1,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Templates/SubclassOf.h"
+#include "TDS_Character.h"
 #include "GameFramework/PlayerController.h"
 #include "TDS_PlayerController.generated.h"
 
+struct FInputActionValue;
+class UInputAction;
+class UInputMappingContext;
 class UNiagaraSystem;
 
 UCLASS()
@@ -15,39 +18,34 @@ class ATDS_PlayerController : public APlayerController
 public:
 	ATDS_PlayerController();
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
-	float ShortPressThreshold;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
-	UNiagaraSystem* FXCursor;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
-	class UInputMappingContext* DefaultMappingContext;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
-	class UInputAction* SetDestinationClickAction;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
-	class UInputAction* SetDestinationTouchAction;
-
 protected:
-	uint32 bMoveToMouseCursor : 1;
 
 	virtual void SetupInputComponent() override;
 	
-	virtual void BeginPlay();
+	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaSeconds) override;
 
-	void OnInputStarted();
-	void OnSetDestinationTriggered();
-	void OnSetDestinationReleased();
-	void OnTouchTriggered();
-	void OnTouchReleased();
+	void OnMousePressed();
+	void OnMouseReleased();
+	void OnMoveForwardPressed(const FInputActionValue& Input);
+
+	void UpdateCharacterRotation() const;
+
+public:
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	UInputMappingContext* DefaultMappingContext;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	UInputAction* MouseClickAction;
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	UInputAction* MoveForwardAction;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	TEnumAsByte<ECollisionChannel> MouseTraceChanel;
 
 private:
-	FVector CachedDestination;
 
-	bool bIsTouch;
-	float FollowTime;
+	UPROPERTY()
+	ATDS_Character* CurrentCharacter = nullptr;
 };
-
-

@@ -28,6 +28,8 @@ public class TopDownShooter : ModuleRules
         PublicIncludePaths.AddRange(new string[]
         {
 	        "TopDownShooter/Public/Core",
+	        "TopDownShooter/Public/Interactables",
+	        "TopDownShooter/Public/Components",
         });
     }
 }

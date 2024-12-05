@@ -1,17 +1,15 @@
 #include "TDS_PlayerController.h"
 #include "GameFramework/Pawn.h"
-#include "Blueprint/AIBlueprintHelperLibrary.h"
-#include "NiagaraFunctionLibrary.h"
 #include "Engine/World.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "TDS_Character.h"
+#include "Kismet/KismetMathLibrary.h"
 
 ATDS_PlayerController::ATDS_PlayerController()
 {
 	bShowMouseCursor = true;
 	DefaultMouseCursor = EMouseCursor::Default;
-	CachedDestination = FVector::ZeroVector;
-	FollowTime = 0.f;
 }
 
 void ATDS_PlayerController::BeginPlay()
@@ -22,6 +20,31 @@ void ATDS_PlayerController::BeginPlay()
 	{
 		Subsystem->AddMappingContext(DefaultMappingContext, 0);
 	}
+	CurrentCharacter = Cast<ATDS_Character>(GetCharacter());
+}
+
+void ATDS_PlayerController::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	UpdateCharacterRotation();
+}
+
+void ATDS_PlayerController::UpdateCharacterRotation() const
+{
+	if (!CurrentCharacter || !GetWorld()) return;
+	
+	FVector WorldLocation, WorldDirection;
+	DeprojectMousePositionToWorld(WorldLocation, WorldDirection);
+
+	FHitResult Result;
+	GetWorld()->LineTraceSingleByChannel(Result, WorldLocation, WorldLocation + WorldDirection * 5000, MouseTraceChanel);
+	DrawDebugLine(GetWorld(), WorldLocation, WorldLocation + WorldDirection * 5000, FColor::Red);
+
+	if (Result.bBlockingHit)
+	{
+		CurrentCharacter->UpdateRotation(UKismetMathLibrary::FindLookAtRotation(CurrentCharacter->GetActorLocation(), Result.Location));
+	}
 }
 
 void ATDS_PlayerController::SetupInputComponent()
@@ -30,70 +53,30 @@ void ATDS_PlayerController::SetupInputComponent()
 
 	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(InputComponent))
 	{
-		EnhancedInputComponent->BindAction(SetDestinationClickAction, ETriggerEvent::Started, this, &ATDS_PlayerController::OnInputStarted);
-		EnhancedInputComponent->BindAction(SetDestinationClickAction, ETriggerEvent::Triggered, this, &ATDS_PlayerController::OnSetDestinationTriggered);
-		EnhancedInputComponent->BindAction(SetDestinationClickAction, ETriggerEvent::Completed, this, &ATDS_PlayerController::OnSetDestinationReleased);
-		EnhancedInputComponent->BindAction(SetDestinationClickAction, ETriggerEvent::Canceled, this, &ATDS_PlayerController::OnSetDestinationReleased);
-
-		EnhancedInputComponent->BindAction(SetDestinationTouchAction, ETriggerEvent::Started, this, &ATDS_PlayerController::OnInputStarted);
-		EnhancedInputComponent->BindAction(SetDestinationTouchAction, ETriggerEvent::Triggered, this, &ATDS_PlayerController::OnTouchTriggered);
-		EnhancedInputComponent->BindAction(SetDestinationTouchAction, ETriggerEvent::Completed, this, &ATDS_PlayerController::OnTouchReleased);
-		EnhancedInputComponent->BindAction(SetDestinationTouchAction, ETriggerEvent::Canceled, this, &ATDS_PlayerController::OnTouchReleased);
+		EnhancedInputComponent->BindAction(MouseClickAction, ETriggerEvent::Started, this, &ATDS_PlayerController::OnMousePressed);
+		EnhancedInputComponent->BindAction(MouseClickAction, ETriggerEvent::Completed, this, &ATDS_PlayerController::OnMouseReleased);
+		EnhancedInputComponent->BindAction(MoveForwardAction, ETriggerEvent::Triggered, this, &ATDS_PlayerController::OnMoveForwardPressed);
 	}
 }
 
-void ATDS_PlayerController::OnInputStarted()
+void ATDS_PlayerController::OnMousePressed()
 {
-	StopMovement();
+	if (!CurrentCharacter) return;
+
+	CurrentCharacter->OnMousePressed();
 }
 
-void ATDS_PlayerController::OnSetDestinationTriggered()
+void ATDS_PlayerController::OnMouseReleased()
 {
-	FollowTime += GetWorld()->GetDeltaSeconds();
+	if (!CurrentCharacter) return;
+
+	CurrentCharacter->OnMouseReleased();
+}
+
+void ATDS_PlayerController::OnMoveForwardPressed(const FInputActionValue& Input)
+{
+	if (!CurrentCharacter) return;
 	
-	FHitResult Hit;
-	bool bHitSuccessful = false;
-	if (bIsTouch)
-	{
-		bHitSuccessful = GetHitResultUnderFinger(ETouchIndex::Touch1, ECollisionChannel::ECC_Visibility, true, Hit);
-	}
-	else
-	{
-		bHitSuccessful = GetHitResultUnderCursor(ECollisionChannel::ECC_Visibility, true, Hit);
-	}
-
-	if (bHitSuccessful)
-	{
-		CachedDestination = Hit.Location;
-	}
-	
-	APawn* ControlledPawn = GetPawn();
-	if (ControlledPawn != nullptr)
-	{
-		FVector WorldDirection = (CachedDestination - ControlledPawn->GetActorLocation()).GetSafeNormal();
-		ControlledPawn->AddMovementInput(WorldDirection, 1.0, false);
-	}
-}
-
-void ATDS_PlayerController::OnSetDestinationReleased()
-{
-	if (FollowTime <= ShortPressThreshold)
-	{
-		UAIBlueprintHelperLibrary::SimpleMoveToLocation(this, CachedDestination);
-		UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, FXCursor, CachedDestination, FRotator::ZeroRotator, FVector(1.f, 1.f, 1.f), true, true, ENCPoolMethod::None, true);
-	}
-
-	FollowTime = 0.f;
-}
-
-void ATDS_PlayerController::OnTouchTriggered()
-{
-	bIsTouch = true;
-	OnSetDestinationTriggered();
-}
-
-void ATDS_PlayerController::OnTouchReleased()
-{
-	bIsTouch = false;
-	OnSetDestinationReleased();
+	const FVector2d MovingVector = Input.Get<FVector2d>();
+	CurrentCharacter->Move(MovingVector);
 }
