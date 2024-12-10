@@ -29,6 +29,13 @@ public:
 
 	UCameraComponent* GetCamera() const;
 
+private:
+
+	void Initialize();
+
+	UFUNCTION(Server, Reliable)
+	void OnPlayerDead();
+
 public:
 	UPROPERTY(EditDefaultsOnly, Category = "Camera")
 	UCameraComponent* TopDownCameraComponent;

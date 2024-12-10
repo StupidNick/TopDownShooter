@@ -16,16 +16,21 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void SetHealth(float InHealth);
-	void SetHealth_Implementation(float InHealth);
+	UFUNCTION(Server, Reliable)
+	void TakeDamage(float InDamage);
+	
+	UFUNCTION(Server, Reliable)
+	void Death();
 
 protected:
 	virtual void BeginPlay() override;
 
 	UFUNCTION()
 	void OnRep_Health();
-	// void OnRep_Health_Implementation();
 
 public:
+	
+	FSimpleDelegate OnDead;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Health")
 	float BaseHealth;

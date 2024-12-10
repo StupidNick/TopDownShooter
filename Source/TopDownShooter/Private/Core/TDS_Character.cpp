@@ -45,11 +45,7 @@ void ATDS_Character::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (HasAuthority() && HealthComponent)
-	{
-		UE_LOG(LogTemp, Error, TEXT("Pass health: %d"), 100);
-		HealthComponent->SetHealth(100.f);
-	}
+	Initialize();
 }
 
 void ATDS_Character::AddMove(FVector2d& InDirection)
@@ -96,4 +92,17 @@ void ATDS_Character::MouseReleased()
 UCameraComponent* ATDS_Character::GetCamera() const 
 {
 	return TopDownCameraComponent;
+}
+
+void ATDS_Character::Initialize()
+{
+	if (HealthComponent)
+	{
+		HealthComponent->OnDead.BindUObject(this, &ATDS_Character::OnPlayerDead_Implementation);
+	}
+}
+
+void ATDS_Character::OnPlayerDead_Implementation()
+{
+	// UnPossessed();
 }
