@@ -14,15 +14,16 @@ public:
 	UTDS_HealthComponent();
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-	// UFUNCTION(Server, Reliable)
+	UFUNCTION(Server, Reliable)
 	void SetHealth(float InHealth);
-	// void SetHealth_Implementation(float InHealth);
+	void SetHealth_Implementation(float InHealth);
 
 protected:
 	virtual void BeginPlay() override;
 
 	UFUNCTION()
 	void OnRep_Health();
+	// void OnRep_Health_Implementation();
 
 public:
 
@@ -32,6 +33,5 @@ public:
 private:
 
 	UPROPERTY(ReplicatedUsing=OnRep_Health)
-	// UPROPERTY(Replicated)
 	float Health;
 };

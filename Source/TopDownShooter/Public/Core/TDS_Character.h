@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "TDS_Controllable.h"
 #include "GameFramework/Character.h"
 #include "TDS_Character.generated.h"
 
@@ -10,7 +11,7 @@ class UCameraComponent;
 class USpringArmComponent;
 
 UCLASS(Blueprintable)
-class ATDS_Character : public ACharacter
+class ATDS_Character : public ACharacter, public ITDS_Controllable
 {
 	GENERATED_BODY()
 
@@ -19,18 +20,12 @@ public:
 
 	virtual void BeginPlay() override;
 
-	void Move(FVector2d InDirection) const;
-
-	UFUNCTION(Server, Unreliable)
-	void UpdateRotation(const FRotator& InTargetRotator);
-	void UpdateRotation_Implementation(const FRotator& InTargetRotator);
-
-	UFUNCTION(Server, Reliable)
-	void OnMousePressed();
-	void OnMousePressed_Implementation();
-	UFUNCTION(Server, Reliable)
-	void OnMouseReleased();
-	void OnMouseReleased_Implementation();
+	// ITDS_Controllable start
+	virtual void AddMove(FVector2d& InDirection) override;
+	virtual void AddRotation(const FVector& InTargetLocation) override;
+	virtual void MousePressed() override;
+	virtual void MouseReleased() override;
+	// end
 
 	UCameraComponent* GetCamera() const;
 

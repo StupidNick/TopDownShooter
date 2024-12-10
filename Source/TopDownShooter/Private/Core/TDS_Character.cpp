@@ -5,7 +5,7 @@
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
-
+#include "Kismet/KismetMathLibrary.h"
 
 
 ATDS_Character::ATDS_Character()
@@ -52,10 +52,12 @@ void ATDS_Character::BeginPlay()
 	}
 }
 
-void ATDS_Character::Move(FVector2d InDirection) const
+void ATDS_Character::AddMove(FVector2d& InDirection)
 {
-	InDirection.X = FMath::Max(InDirection.X, 1.);
-	InDirection.Y = FMath::Max(InDirection.Y, 1.);
+	ITDS_Controllable::AddMove(InDirection);
+
+	InDirection.X = FMath::Min(InDirection.X, 1.);
+	InDirection.Y = FMath::Min(InDirection.Y, 1.);
 	
 	if (const auto MovementComponent = GetMovementComponent())
 	{
@@ -63,22 +65,29 @@ void ATDS_Character::Move(FVector2d InDirection) const
 	}
 }
 
-void ATDS_Character::UpdateRotation_Implementation(const FRotator& InTargetRotator)
+void ATDS_Character::AddRotation(const FVector& InTargetLocation)
 {
+	ITDS_Controllable::AddRotation(InTargetLocation);
+
+	const FRotator InTargetRotator = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), InTargetLocation);
+
 	const FRotator CurrentRotator = GetActorRotation();
 	SetActorRotation(FRotator(CurrentRotator.Pitch, InTargetRotator.Yaw, CurrentRotator.Roll));
 }
 
-void ATDS_Character::OnMousePressed_Implementation()
+void ATDS_Character::MousePressed()
 {
+	ITDS_Controllable::MousePressed();
+
 	if (!EquipmentComponent) return;
 
-	HealthComponent->SetHealth(200.f);
 	EquipmentComponent->OnMousePressed();
 }
 
-void ATDS_Character::OnMouseReleased_Implementation()
+void ATDS_Character::MouseReleased()
 {
+	ITDS_Controllable::MouseReleased();
+
 	if (!EquipmentComponent) return;
 
 	EquipmentComponent->OnMouseReleased();
