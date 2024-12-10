@@ -13,7 +13,7 @@ void UTDS_HealthComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (!GetOwner()->HasAuthority())
+	if (GetOwner()->HasAuthority())
 	{
 		SetHealth(BaseHealth);
 	}
