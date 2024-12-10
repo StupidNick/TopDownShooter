@@ -24,5 +24,4 @@ protected:
 public:	
 	
 	ITDS_Clickable* ObjectInHands = nullptr;
-		
 };

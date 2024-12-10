@@ -1,11 +1,11 @@
 #include "TDS_Character.h"
 #include "TDS_EquipmentComponent.h"
-#include "UObject/ConstructorHelpers.h"
+#include "TDS_HealthComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
-
+#include "Kismet/KismetMathLibrary.h"
 
 
 ATDS_Character::ATDS_Character()
@@ -33,15 +33,27 @@ ATDS_Character::ATDS_Character()
 	TopDownCameraComponent->bUsePawnControlRotation = false;
 
 	EquipmentComponent = CreateDefaultSubobject<UTDS_EquipmentComponent>(TEXT("EquipmentComponent"));
+	HealthComponent = CreateDefaultSubobject<UTDS_HealthComponent>(TEXT("HealthComponent"));
 
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
+
+	SetReplicates(true);
 }
 
-void ATDS_Character::Move(FVector2d InDirection) const
+void ATDS_Character::BeginPlay()
 {
-	InDirection.X = FMath::Max(InDirection.X, 1.);
-	InDirection.Y = FMath::Max(InDirection.Y, 1.);
+	Super::BeginPlay();
+
+	Initialize();
+}
+
+void ATDS_Character::AddMove(FVector2d& InDirection)
+{
+	ITDS_Controllable::AddMove(InDirection);
+
+	InDirection.X = FMath::Min(InDirection.X, 1.);
+	InDirection.Y = FMath::Min(InDirection.Y, 1.);
 	
 	if (const auto MovementComponent = GetMovementComponent())
 	{
@@ -49,21 +61,29 @@ void ATDS_Character::Move(FVector2d InDirection) const
 	}
 }
 
-void ATDS_Character::UpdateRotation_Implementation(const FRotator& InTargetRotator)
+void ATDS_Character::AddRotation(const FVector& InTargetLocation)
 {
+	ITDS_Controllable::AddRotation(InTargetLocation);
+
+	const FRotator InTargetRotator = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), InTargetLocation);
+
 	const FRotator CurrentRotator = GetActorRotation();
 	SetActorRotation(FRotator(CurrentRotator.Pitch, InTargetRotator.Yaw, CurrentRotator.Roll));
 }
 
-void ATDS_Character::OnMousePressed_Implementation()
+void ATDS_Character::MousePressed()
 {
+	ITDS_Controllable::MousePressed();
+
 	if (!EquipmentComponent) return;
 
 	EquipmentComponent->OnMousePressed();
 }
 
-void ATDS_Character::OnMouseReleased_Implementation()
+void ATDS_Character::MouseReleased()
 {
+	ITDS_Controllable::MouseReleased();
+
 	if (!EquipmentComponent) return;
 
 	EquipmentComponent->OnMouseReleased();
@@ -72,4 +92,17 @@ void ATDS_Character::OnMouseReleased_Implementation()
 UCameraComponent* ATDS_Character::GetCamera() const 
 {
 	return TopDownCameraComponent;
+}
+
+void ATDS_Character::Initialize()
+{
+	if (HealthComponent)
+	{
+		HealthComponent->OnDead.BindUObject(this, &ATDS_Character::OnPlayerDead_Implementation);
+	}
+}
+
+void ATDS_Character::OnPlayerDead_Implementation()
+{
+	// UnPossessed();
 }

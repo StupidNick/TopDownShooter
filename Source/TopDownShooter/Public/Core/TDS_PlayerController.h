@@ -46,6 +46,5 @@ public:
 
 private:
 
-	UPROPERTY()
-	ATDS_Character* CurrentCharacter = nullptr;
+	ITDS_Controllable* CurrentCharacter = nullptr;
 };

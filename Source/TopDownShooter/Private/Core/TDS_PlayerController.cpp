@@ -1,10 +1,10 @@
 #include "TDS_PlayerController.h"
-#include "GameFramework/Pawn.h"
 #include "Engine/World.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "TDS_Character.h"
-#include "Kismet/KismetMathLibrary.h"
+
+
 
 ATDS_PlayerController::ATDS_PlayerController()
 {
@@ -20,7 +20,7 @@ void ATDS_PlayerController::BeginPlay()
 	{
 		Subsystem->AddMappingContext(DefaultMappingContext, 0);
 	}
-	CurrentCharacter = Cast<ATDS_Character>(GetCharacter());
+	CurrentCharacter = Cast<ITDS_Controllable>(GetCharacter());
 }
 
 void ATDS_PlayerController::Tick(float DeltaSeconds)
@@ -43,7 +43,7 @@ void ATDS_PlayerController::UpdateCharacterRotation() const
 
 	if (Result.bBlockingHit)
 	{
-		CurrentCharacter->UpdateRotation(UKismetMathLibrary::FindLookAtRotation(CurrentCharacter->GetActorLocation(), Result.Location));
+		CurrentCharacter->AddRotation(Result.Location);
 	}
 }
 
@@ -63,20 +63,20 @@ void ATDS_PlayerController::OnMousePressed()
 {
 	if (!CurrentCharacter) return;
 
-	CurrentCharacter->OnMousePressed();
+	CurrentCharacter->MousePressed();
 }
 
 void ATDS_PlayerController::OnMouseReleased()
 {
 	if (!CurrentCharacter) return;
 
-	CurrentCharacter->OnMouseReleased();
+	CurrentCharacter->MouseReleased();
 }
 
 void ATDS_PlayerController::OnMoveForwardPressed(const FInputActionValue& Input)
 {
 	if (!CurrentCharacter) return;
 	
-	const FVector2d MovingVector = Input.Get<FVector2d>();
-	CurrentCharacter->Move(MovingVector);
+	FVector2d MovingVector = Input.Get<FVector2d>();
+	CurrentCharacter->AddMove(MovingVector);
 }
