@@ -1,6 +1,6 @@
 #include "TDS_Character.h"
 #include "TDS_EquipmentComponent.h"
-#include "UObject/ConstructorHelpers.h"
+#include "TDS_HealthComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -33,9 +33,23 @@ ATDS_Character::ATDS_Character()
 	TopDownCameraComponent->bUsePawnControlRotation = false;
 
 	EquipmentComponent = CreateDefaultSubobject<UTDS_EquipmentComponent>(TEXT("EquipmentComponent"));
+	HealthComponent = CreateDefaultSubobject<UTDS_HealthComponent>(TEXT("HealthComponent"));
 
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
+
+	SetReplicates(true);
+}
+
+void ATDS_Character::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (HasAuthority() && HealthComponent)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Pass health: %d"), 100);
+		HealthComponent->SetHealth(100.f);
+	}
 }
 
 void ATDS_Character::Move(FVector2d InDirection) const
@@ -59,6 +73,7 @@ void ATDS_Character::OnMousePressed_Implementation()
 {
 	if (!EquipmentComponent) return;
 
+	HealthComponent->SetHealth(200.f);
 	EquipmentComponent->OnMousePressed();
 }
 

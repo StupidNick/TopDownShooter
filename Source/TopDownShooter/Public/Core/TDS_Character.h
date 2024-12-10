@@ -5,6 +5,7 @@
 #include "TDS_Character.generated.h"
 
 class UTDS_EquipmentComponent;
+class UTDS_HealthComponent;
 class UCameraComponent;
 class USpringArmComponent;
 
@@ -15,6 +16,8 @@ class ATDS_Character : public ACharacter
 
 public:
 	ATDS_Character();
+
+	virtual void BeginPlay() override;
 
 	void Move(FVector2d InDirection) const;
 
@@ -40,4 +43,7 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Components")
 	UTDS_EquipmentComponent* EquipmentComponent;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Components")
+	UTDS_HealthComponent* HealthComponent;
 };
