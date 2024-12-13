@@ -22,6 +22,7 @@ public:
 
 	// ITDS_Controllable start
 	virtual void AddMove(FVector2d& InDirection) override;
+	UFUNCTION(Server, Unreliable)
 	virtual void AddRotation(const FVector& InTargetLocation) override;
 	virtual void MousePressed() override;
 	virtual void MouseReleased() override;

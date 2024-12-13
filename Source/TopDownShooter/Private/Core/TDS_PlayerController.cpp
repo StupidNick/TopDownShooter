@@ -39,7 +39,6 @@ void ATDS_PlayerController::UpdateCharacterRotation() const
 
 	FHitResult Result;
 	GetWorld()->LineTraceSingleByChannel(Result, WorldLocation, WorldLocation + WorldDirection * 5000, MouseTraceChanel);
-	DrawDebugLine(GetWorld(), WorldLocation, WorldLocation + WorldDirection * 5000, FColor::Red);
 
 	if (Result.bBlockingHit)
 	{

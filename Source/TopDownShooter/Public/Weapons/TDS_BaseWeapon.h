@@ -16,11 +16,11 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-protected:
-	virtual void BeginPlay() override;
-
 	UFUNCTION(Server, Reliable)
 	virtual void Initialize();
+
+protected:
+	virtual void BeginPlay() override;
 
 	UFUNCTION()
 	virtual bool CanShoot();
@@ -32,11 +32,16 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Base Info")
 	UTDS_WeaponInfo* WeaponInfo;
+
+	UPROPERTY(EditDefaultsOnly)
+	USkeletalMeshComponent* Mesh;
 protected:
 
 	UPROPERTY(ReplicatedUsing=OnRep_AmmoChanged)
 	int32 Ammo;
 
-	// UPROPERTY(Replicated)
 	bool bCanShoot = true;
+
+	UPROPERTY(Replicated)
+	APlayerController* OwnedController;
 };

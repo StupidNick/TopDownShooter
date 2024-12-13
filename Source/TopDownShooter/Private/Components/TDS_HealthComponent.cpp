@@ -6,13 +6,13 @@
 UTDS_HealthComponent::UTDS_HealthComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
-	SetIsReplicated(true);
 }
 
 void UTDS_HealthComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
+	SetIsReplicated(true);
 	if (GetOwner()->HasAuthority())
 	{
 		SetHealth(BaseHealth);

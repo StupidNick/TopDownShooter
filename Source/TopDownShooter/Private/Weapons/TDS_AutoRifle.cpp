@@ -19,7 +19,6 @@ void ATDS_AutoRifle::Initialize()
 void ATDS_AutoRifle::OnLeftMouseButtonPressed()
 {
 	ITDS_Usable::OnLeftMouseButtonPressed();
-	UE_LOG(LogTemp, Warning, TEXT("Start fire"));
 
 	StartFire();
 }
@@ -55,10 +54,19 @@ void ATDS_AutoRifle::StartFire_Implementation()
 
 void ATDS_AutoRifle::Fire_Implementation()
 {
-	if (!WeaponInfo || !bIsFiring || !CanShoot()) return;
+	if (!WeaponInfo || !bIsFiring || !CanShoot() || !OwnedController) return;
+
+	FVector WorldLocation, WorldDirection;
+	OwnedController->DeprojectMousePositionToWorld(WorldLocation, WorldDirection);
 	
-	UE_LOG(LogTemp, Warning, TEXT("Fire from weapon"));
+	FHitResult Result;
+	const FVector StartLocation = Mesh->GetSocketLocation(WeaponInfo->FireSocketName);
+	GetWorld()->LineTraceSingleByChannel(Result, StartLocation, FVector(WorldLocation.X, WorldLocation.Y, StartLocation.Z), ECC_WorldStatic);
+	DrawDebugLine(GetWorld(), StartLocation, FVector(WorldLocation.X, WorldLocation.Y, StartLocation.Z), FColor::Red);
+	
 	bCanShoot = false;
+	Ammo--;
+	UE_LOG(LogTemp, Warning, TEXT("%s Fire from weapon, ammo left %i. Hit %s"), *GetName(), Ammo, *Result.HitObjectHandle.GetName());
 	GetWorldTimerManager().SetTimer(ReloadBetweenShotsTimerHandle, this, &ATDS_AutoRifle::FireAgain_Implementation, WeaponInfo->TimeBetweenShots);
 }
 

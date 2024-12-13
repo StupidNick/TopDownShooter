@@ -1,8 +1,9 @@
 #include "TDS_EquipmentComponent.h"
 
 #include "TDS_BaseWeapon.h"
+#include "TDS_Character.h"
 #include "TDS_Usable.h"
-
+#include "Net/UnrealNetwork.h"
 
 
 UTDS_EquipmentComponent::UTDS_EquipmentComponent()
@@ -10,38 +11,46 @@ UTDS_EquipmentComponent::UTDS_EquipmentComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 }
 
-// void UTDS_EquipmentComponent::GetObjectInHand_Implementation(ITDS_Usable* InObject)
-// {
-	
-// }
+void UTDS_EquipmentComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME_CONDITION(UTDS_EquipmentComponent, ObjectInHands, COND_OwnerOnly);
+}
 
 void UTDS_EquipmentComponent::AddWeapon_Implementation(TSubclassOf<ATDS_BaseWeapon> InWeaponClass)
 {
 	if (!GetWorld()) return;
 
-	const FActorSpawnParameters SpawnParams;
-	// FVector* SpawnLocation = nullptr;
-	// *SpawnLocation = GetOwner()->GetActorLocation();
-	auto Weapon = GetWorld()->SpawnActor<ATDS_BaseWeapon>(InWeaponClass, GetOwner()->GetActorLocation(), GetOwner()->GetActorRotation());
+	const auto Weapon = GetWorld()->SpawnActor<ATDS_BaseWeapon>(InWeaponClass, GetOwner()->GetActorLocation(), GetOwner()->GetActorRotation());
 	if (!Weapon) return;
 
-	UE_LOG(LogTemp, Error, TEXT("Spawned weapon"));
-	GetObjectInHand(Cast<ITDS_Usable>(Weapon));
+	Weapon->SetOwner(GetOwner());
+	SetObjectInHand(Weapon);
+	Weapon->Initialize();
 }
 
-void UTDS_EquipmentComponent::GetObjectInHand(ITDS_Usable* InObject)
+void UTDS_EquipmentComponent::SetObjectInHand(AActor* InObject)
 {
 	if (!InObject) return;
 	
-	ObjectInHands = InObject;
-	UE_LOG(LogTemp, Error, TEXT("Weapon in hands"));
+	if (InObject->Implements<UTDS_Usable>())
+	{
+		ObjectInHands = TScriptInterface<ITDS_Usable>(InObject);
+	}
+	if (const auto Character = Cast<ACharacter>(GetOwner()))
+	{
+		if (!GetOwner()->HasAuthority())
+		{
+			UE_LOG(LogTemp, Error, TEXT("OnClient"));
+		}
+		InObject->AttachToActor(Character, FAttachmentTransformRules::KeepWorldTransform, WeaponSocketName);
+	}
 }
 
 void UTDS_EquipmentComponent::OnMousePressed() const
 {
-	UE_LOG(LogTemp, Warning, TEXT("Mouse pressed in Equipment component"));
 	if (!ObjectInHands) return;
-
 	
 	ObjectInHands->OnLeftMouseButtonPressed();
 }

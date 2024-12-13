@@ -38,7 +38,7 @@ ATDS_Character::ATDS_Character()
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
 
-	SetReplicates(true);
+	bReplicates = true;
 }
 
 void ATDS_Character::BeginPlay()
@@ -61,7 +61,7 @@ void ATDS_Character::AddMove(FVector2d& InDirection)
 	}
 }
 
-void ATDS_Character::AddRotation(const FVector& InTargetLocation)
+void ATDS_Character::AddRotation_Implementation(const FVector& InTargetLocation)
 {
 	ITDS_Controllable::AddRotation(InTargetLocation);
 
