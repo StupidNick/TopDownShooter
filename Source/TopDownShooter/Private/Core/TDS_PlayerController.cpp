@@ -21,6 +21,10 @@ void ATDS_PlayerController::BeginPlay()
 		Subsystem->AddMappingContext(DefaultMappingContext, 0);
 	}
 	CurrentCharacter = Cast<ITDS_Controllable>(GetCharacter());
+	if (CurrentCharacter)
+	{
+		CurrentCharacter->SetPlayerController(this);
+	}
 }
 
 void ATDS_PlayerController::Tick(float DeltaSeconds)

@@ -34,6 +34,7 @@ void UTDS_HealthComponent::SetHealth_Implementation(float InHealth)
 void UTDS_HealthComponent::TakeDamage_Implementation(float InDamage)
 {
 	Health -= InDamage;
+	UE_LOG(LogTemp, Warning, TEXT("Hit %s health left %f"), *GetOwner()->GetName(), Health);
 	if (Health <= 0)
 	{
 		Death();

@@ -6,6 +6,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Net/UnrealNetwork.h"
 
 
 ATDS_Character::ATDS_Character()
@@ -46,6 +47,22 @@ void ATDS_Character::BeginPlay()
 	Super::BeginPlay();
 
 	Initialize();
+}
+
+void ATDS_Character::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME_CONDITION(ATDS_Character, CurrentPlayerController, COND_OwnerOnly);
+}
+
+float ATDS_Character::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator,
+	AActor* DamageCauser)
+{
+	if (!HealthComponent) return Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	HealthComponent->TakeDamage(DamageAmount);
+	return Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 }
 
 void ATDS_Character::AddMove(FVector2d& InDirection)
@@ -92,6 +109,18 @@ void ATDS_Character::MouseReleased()
 UCameraComponent* ATDS_Character::GetCamera() const 
 {
 	return TopDownCameraComponent;
+}
+
+void ATDS_Character::SetPlayerController_Implementation(APlayerController* InController)
+{
+	CurrentPlayerController = InController;
+	UE_LOG(LogTemp, Warning, TEXT("Player controller in character: %s"), CurrentPlayerController);
+}
+
+APlayerController* ATDS_Character::GetPlayerController()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Get Player controller in character: %s"), CurrentPlayerController);
+	return CurrentPlayerController;
 }
 
 void ATDS_Character::Initialize()

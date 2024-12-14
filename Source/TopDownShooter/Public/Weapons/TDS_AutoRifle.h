@@ -28,15 +28,27 @@ public:
 
 protected:
 
-	UFUNCTION(Server, Reliable)
 	void StartFire();
-	UFUNCTION(Server, Reliable)
+	UFUNCTION(Client, Reliable)
 	void Fire();
+	
 	UFUNCTION(Server, Reliable)
-	void StopFire();
+	void StartFireOnServer();
+	UFUNCTION(Server, Reliable)
+	void FireOnServer(FVector InTargetLocation);
+	UFUNCTION(Server, Reliable)
+	void StopFireOnServer();
+	UFUNCTION(Server, Reliable)
+	void FireAgainOnServer();
 
-	UFUNCTION(Server, Reliable)
-	void FireAgain();
+	// Debug
+	UFUNCTION(NetMulticast, Reliable)
+	void DrawDebugFire(const FVector& InStartLocation, const FVector& InEndLocation);
+
+public:
+
+	UPROPERTY(EditDefaultsOnly)
+	TEnumAsByte<ECollisionChannel> CollisionChannel;
 
 protected:
 	

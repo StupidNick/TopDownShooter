@@ -22,7 +22,7 @@ void UTDS_EquipmentComponent::AddWeapon_Implementation(TSubclassOf<ATDS_BaseWeap
 {
 	if (!GetWorld()) return;
 
-	const auto Weapon = GetWorld()->SpawnActor<ATDS_BaseWeapon>(InWeaponClass, GetOwner()->GetActorLocation(), GetOwner()->GetActorRotation());
+	const auto Weapon = GetWorld()->SpawnActor<ATDS_BaseWeapon>(InWeaponClass);
 	if (!Weapon) return;
 
 	Weapon->SetOwner(GetOwner());
@@ -40,11 +40,9 @@ void UTDS_EquipmentComponent::SetObjectInHand(AActor* InObject)
 	}
 	if (const auto Character = Cast<ACharacter>(GetOwner()))
 	{
-		if (!GetOwner()->HasAuthority())
-		{
-			UE_LOG(LogTemp, Error, TEXT("OnClient"));
-		}
-		InObject->AttachToActor(Character, FAttachmentTransformRules::KeepWorldTransform, WeaponSocketName);
+		InObject->AttachToComponent(Character->GetMesh(), FAttachmentTransformRules::KeepWorldTransform, WeaponSocketName);
+		InObject->SetActorRelativeLocation(FVector(0.f, 0.f, 0.f));
+		InObject->SetActorRotation(FRotator::ZeroRotator);
 	}
 }
 

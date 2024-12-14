@@ -19,6 +19,8 @@ public:
 	ATDS_Character();
 
 	virtual void BeginPlay() override;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
 	// ITDS_Controllable start
 	virtual void AddMove(FVector2d& InDirection) override;
@@ -29,6 +31,10 @@ public:
 	// end
 
 	UCameraComponent* GetCamera() const;
+
+	UFUNCTION(Server, Reliable)
+	virtual void SetPlayerController(APlayerController* InController) override;
+	virtual APlayerController* GetPlayerController() override;
 
 private:
 
@@ -49,4 +55,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Components")
 	UTDS_HealthComponent* HealthComponent;
+
+private:
+
+	UPROPERTY(Replicated)
+	APlayerController* CurrentPlayerController;
 };

@@ -19,4 +19,7 @@ public:
 	virtual void MouseReleased();
 	virtual void AddMove(FVector2d& InDirection);
 	virtual void AddRotation(const FVector& InTargetLocation);
+
+	virtual void SetPlayerController(APlayerController* InController);
+	virtual APlayerController* GetPlayerController();
 };

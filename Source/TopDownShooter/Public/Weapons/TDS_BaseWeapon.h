@@ -25,8 +25,7 @@ protected:
 	UFUNCTION()
 	virtual bool CanShoot();
 
-	UFUNCTION()
-	virtual void OnRep_AmmoChanged();
+	void TakeOwnedController();
 
 public:
 
@@ -37,7 +36,7 @@ public:
 	USkeletalMeshComponent* Mesh;
 protected:
 
-	UPROPERTY(ReplicatedUsing=OnRep_AmmoChanged)
+	UPROPERTY(Replicated)
 	int32 Ammo;
 
 	bool bCanShoot = true;

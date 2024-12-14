@@ -1,5 +1,6 @@
 #include "TDS_BaseWeapon.h"
 
+#include "TDS_Controllable.h"
 #include "GameFramework/Character.h"
 #include "Net/UnrealNetwork.h"
 
@@ -29,23 +30,27 @@ void ATDS_BaseWeapon::BeginPlay()
 
 bool ATDS_BaseWeapon::CanShoot()
 {
+	if (!OwnedController)
+	{
+		TakeOwnedController();
+	}
 	return Ammo > 0 && bCanShoot;
 }
 
-void ATDS_BaseWeapon::OnRep_AmmoChanged()
+void ATDS_BaseWeapon::TakeOwnedController()
 {
+	if (const auto CurrentOwner = Cast<ITDS_Controllable>(GetOwner()))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Current owner is valid %s"), CurrentOwner->GetPlayerController());
+		OwnedController = CurrentOwner->GetPlayerController();
+		if (OwnedController)
+		{
+			UE_LOG(LogTemp, Error, TEXT("Controller: %s"), *OwnedController->GetName());
+		}
+	}
 }
 
 void ATDS_BaseWeapon::Initialize_Implementation()
 {
-	if (const auto CurrentOwner = Cast<ACharacter>(GetOwner())) // TODO get controller or find other way to pick mouse hit point
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Initialize %s"), *CurrentOwner->GetName());
-		
-		OwnedController = Cast<APlayerController>(CurrentOwner->GetController());
-		if (OwnedController)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Controller: %s"), *OwnedController->GetName());
-		}
-	}
+	
 }
