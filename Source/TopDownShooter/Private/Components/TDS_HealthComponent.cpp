@@ -6,14 +6,14 @@
 UTDS_HealthComponent::UTDS_HealthComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
-	SetIsReplicated(true);
 }
 
 void UTDS_HealthComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (!GetOwner()->HasAuthority())
+	SetIsReplicated(true);
+	if (GetOwner()->HasAuthority())
 	{
 		SetHealth(BaseHealth);
 	}
@@ -34,6 +34,7 @@ void UTDS_HealthComponent::SetHealth_Implementation(float InHealth)
 void UTDS_HealthComponent::TakeDamage_Implementation(float InDamage)
 {
 	Health -= InDamage;
+	UE_LOG(LogTemp, Warning, TEXT("Hit %s health left %f"), *GetOwner()->GetName(), Health);
 	if (Health <= 0)
 	{
 		Death();

@@ -6,6 +6,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Net/UnrealNetwork.h"
 
 
 ATDS_Character::ATDS_Character()
@@ -38,7 +39,7 @@ ATDS_Character::ATDS_Character()
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
 
-	SetReplicates(true);
+	bReplicates = true;
 }
 
 void ATDS_Character::BeginPlay()
@@ -46,6 +47,23 @@ void ATDS_Character::BeginPlay()
 	Super::BeginPlay();
 
 	Initialize();
+}
+
+void ATDS_Character::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME_CONDITION(ATDS_Character, CurrentPlayerController, COND_OwnerOnly);
+	DOREPLIFETIME_CONDITION(ATDS_Character, bIsAlive, COND_OwnerOnly);
+}
+
+float ATDS_Character::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator,
+	AActor* DamageCauser)
+{
+	if (!bIsAlive || !HealthComponent || DamageCauser == this) return Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	HealthComponent->TakeDamage(DamageAmount);
+	return Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 }
 
 void ATDS_Character::AddMove(FVector2d& InDirection)
@@ -61,8 +79,10 @@ void ATDS_Character::AddMove(FVector2d& InDirection)
 	}
 }
 
-void ATDS_Character::AddRotation(const FVector& InTargetLocation)
+void ATDS_Character::AddRotation_Implementation(const FVector& InTargetLocation)
 {
+	if (!bIsAlive) return;
+	
 	ITDS_Controllable::AddRotation(InTargetLocation);
 
 	const FRotator InTargetRotator = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), InTargetLocation);
@@ -73,6 +93,8 @@ void ATDS_Character::AddRotation(const FVector& InTargetLocation)
 
 void ATDS_Character::MousePressed()
 {
+	if (!bIsAlive) return;
+	
 	ITDS_Controllable::MousePressed();
 
 	if (!EquipmentComponent) return;
@@ -82,6 +104,8 @@ void ATDS_Character::MousePressed()
 
 void ATDS_Character::MouseReleased()
 {
+	if (!bIsAlive) return;
+	
 	ITDS_Controllable::MouseReleased();
 
 	if (!EquipmentComponent) return;
@@ -89,20 +113,64 @@ void ATDS_Character::MouseReleased()
 	EquipmentComponent->OnMouseReleased();
 }
 
+void ATDS_Character::ReloadPressed()
+{
+	ITDS_Controllable::ReloadPressed();
+
+	if (!EquipmentComponent) return;
+
+	UE_LOG(LogTemp, Error, TEXT("Reload in character"));
+	EquipmentComponent->OnReloadPressed();
+}
+
 UCameraComponent* ATDS_Character::GetCamera() const 
 {
 	return TopDownCameraComponent;
+}
+
+void ATDS_Character::SetPlayerController_Implementation(APlayerController* InController)
+{
+	CurrentPlayerController = InController;
+}
+
+APlayerController* ATDS_Character::GetPlayerController()
+{
+	return CurrentPlayerController;
 }
 
 void ATDS_Character::Initialize()
 {
 	if (HealthComponent)
 	{
-		HealthComponent->OnDead.BindUObject(this, &ATDS_Character::OnPlayerDead_Implementation);
+		HealthComponent->OnDead.BindUObject(this, &ATDS_Character::OnPlayerDeadOnServer_Implementation);
 	}
 }
 
-void ATDS_Character::OnPlayerDead_Implementation()
+void ATDS_Character::OnPlayerDeadOnServer_Implementation()
 {
-	// UnPossessed();
+	if (!CurrentPlayerController || !GetMovementComponent() || !EquipmentComponent) return;
+
+	OnPlayerDeadOnClient();
+	GetMovementComponent()->Deactivate();
+	MouseReleased();
+	bIsAlive = false;
+	
+	GetCapsuleComponent()->SetCollisionProfileName(FName("NoCollision"));
+	EquipmentComponent->DetachObjectInHand();
+
+	FTimerHandle DestroyTimerHandler;
+	GetWorldTimerManager().SetTimer(DestroyTimerHandler, this, &ATDS_Character::DestroyCharacter, 10.f);
+
+	OnPLayerDead.ExecuteIfBound();
+}
+
+void ATDS_Character::OnPlayerDeadOnClient_Implementation()
+{
+	GetMesh()->SetSimulatePhysics(true);
+	GetMesh()->SetCollisionProfileName(RagdollCollisionProfileName.Name, true);
+}
+
+void ATDS_Character::DestroyCharacter_Implementation()
+{
+	Destroy();
 }

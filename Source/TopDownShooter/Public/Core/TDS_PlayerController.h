@@ -17,6 +17,7 @@ class ATDS_PlayerController : public APlayerController
 
 public:
 	ATDS_PlayerController();
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 protected:
 
@@ -27,9 +28,18 @@ protected:
 
 	void OnMousePressed();
 	void OnMouseReleased();
+	
+	void OnReloadPressed();
+	
 	void OnMoveForwardPressed(const FInputActionValue& Input);
 
 	void UpdateCharacterRotation() const;
+	void OnPlayerDead();
+
+	UFUNCTION(Server, Unreliable)
+	void Respawn();
+
+	virtual void OnPossess(APawn* InPawn) override;
 
 public:
 
@@ -39,12 +49,16 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	UInputAction* MouseClickAction;
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
-	UInputAction* MoveForwardAction;
+	UInputAction* ReloadAction;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	UInputAction* MoveAction;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	TEnumAsByte<ECollisionChannel> MouseTraceChanel;
 
 private:
 
-	ITDS_Controllable* CurrentCharacter = nullptr;
+	UPROPERTY(Replicated)
+	TScriptInterface<ITDS_Controllable> CurrentCharacter = nullptr;
 };

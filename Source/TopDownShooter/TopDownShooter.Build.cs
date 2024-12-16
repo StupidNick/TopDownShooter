@@ -28,8 +28,10 @@ public class TopDownShooter : ModuleRules
         PublicIncludePaths.AddRange(new string[]
         {
 	        "TopDownShooter/Public/Core",
-	        "TopDownShooter/Public/Interactables",
+	        "TopDownShooter/Public/Interfaces",
 	        "TopDownShooter/Public/Components",
+	        "TopDownShooter/Public/Weapons",
+	        "TopDownShooter/Public/Data",
         });
     }
 }
