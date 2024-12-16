@@ -33,6 +33,9 @@ public:
 	UTDS_WeaponInfo* WeaponInfo;
 
 	UPROPERTY(EditDefaultsOnly)
+	TEnumAsByte<ECollisionChannel> CameraTraceCollisionChannel;
+
+	UPROPERTY(EditDefaultsOnly)
 	USkeletalMeshComponent* Mesh;
 protected:
 

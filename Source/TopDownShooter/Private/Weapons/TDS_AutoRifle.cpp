@@ -50,6 +50,13 @@ void ATDS_AutoRifle::OnReloadPressed()
 	ITDS_Usable::OnReloadPressed();
 }
 
+void ATDS_AutoRifle::Detach()
+{
+	ITDS_Usable::Detach();
+
+	DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+}
+
 void ATDS_AutoRifle::StartFire()
 {
 	if (!CanShoot()) return;
@@ -72,7 +79,7 @@ void ATDS_AutoRifle::Fire_Implementation()
 
 	FHitResult Result;
 	const FVector StartLocation = Mesh->GetSocketLocation(WeaponInfo->FireSocketName);
-	GetWorld()->LineTraceSingleByChannel(Result, WorldLocation, WorldLocation + WorldDirection * 5000, ECC_WorldStatic);
+	GetWorld()->LineTraceSingleByChannel(Result, WorldLocation, WorldLocation + WorldDirection * 5000, CameraTraceCollisionChannel);
 	DrawDebugFire(WorldLocation, WorldLocation + WorldDirection * 5000);
 
 	FireOnServer(Result.Location);
@@ -88,16 +95,17 @@ void ATDS_AutoRifle::FireOnServer_Implementation(FVector InTargetLocation)
 	Direction.Normalize();
 	const FVector EndLocation = StartLocation + Direction * 1000;
 	
-	GetWorld()->LineTraceMultiByChannel(Result, StartLocation,  EndLocation, CollisionChannel);
+	GetWorld()->LineTraceMultiByChannel(Result, StartLocation,  EndLocation, ShootCollisionChannel);
 	DrawDebugFire(StartLocation, EndLocation);
 	
 	bCanShoot = false;
 	Ammo--;
 	GetWorldTimerManager().SetTimer(ReloadBetweenShotsTimerHandle, this, &ATDS_AutoRifle::FireAgainOnServer, WeaponInfo->TimeBetweenShots);
 
-	UE_LOG(LogTemp, Error, TEXT("Hits: %i"), Result.Num());
 	for (auto HitResult : Result)
 	{
+		if (!HitResult.GetActor()->IsA(ACharacter::StaticClass())) break;
+		
 		HitResult.GetActor()->TakeDamage(WeaponInfo->Damage, FDamageEvent(), OwnedController, OwnedController->GetCharacter());
 		
 		UE_LOG(LogTemp, Warning, TEXT("%s Fire from weapon, ammo left %i. Hit %s"), *GetName(), Ammo, *HitResult.HitObjectHandle.GetName());

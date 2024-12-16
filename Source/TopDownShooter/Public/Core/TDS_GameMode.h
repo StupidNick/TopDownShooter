@@ -11,4 +11,10 @@ class ATDS_GameMode : public AGameModeBase
 
 public:
 	ATDS_GameMode();
+
+	// virtual void BeginPlay() override;
+
+	// UFUNCTION(Server, Reliable)
+	ACharacter* CreateCharacter(APlayerController* InPlayerController);
+
 };

@@ -46,6 +46,13 @@ void UTDS_EquipmentComponent::SetObjectInHand(AActor* InObject)
 	}
 }
 
+void UTDS_EquipmentComponent::DetachObjectInHand()
+{
+	if (!ObjectInHands) return;
+
+	ObjectInHands->Detach();
+}
+
 void UTDS_EquipmentComponent::OnMousePressed() const
 {
 	if (!ObjectInHands) return;

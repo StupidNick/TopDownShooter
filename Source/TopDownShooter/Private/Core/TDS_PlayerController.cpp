@@ -3,7 +3,9 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "TDS_Character.h"
-
+#include "TDS_GameMode.h"
+#include "Kismet/GameplayStatics.h"
+#include "Net/UnrealNetwork.h"
 
 
 ATDS_PlayerController::ATDS_PlayerController()
@@ -12,25 +14,41 @@ ATDS_PlayerController::ATDS_PlayerController()
 	DefaultMouseCursor = EMouseCursor::Default;
 }
 
+void ATDS_PlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME_CONDITION(ATDS_PlayerController, CurrentCharacter, COND_OwnerOnly);
+}
+
 void ATDS_PlayerController::BeginPlay()
 {
 	Super::BeginPlay();
+	
 
 	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
 	{
 		Subsystem->AddMappingContext(DefaultMappingContext, 0);
 	}
-	CurrentCharacter = Cast<ITDS_Controllable>(GetCharacter());
-	if (CurrentCharacter)
-	{
-		CurrentCharacter->SetPlayerController(this);
-	}
+	UE_LOG(LogTemp, Warning, TEXT("BeginPlay"));
+	// CurrentCharacter = Cast<ITDS_Controllable>(GetCharacter());
+	// UE_LOG(LogTemp, Error, TEXT("Current character: %s"), GetCharacter());
+	// if (CurrentCharacter)
+	// {
+	// 	CurrentCharacter->SetPlayerController(this);
+	// 	UE_LOG(LogTemp, Error, TEXT("Subscribe on event PC"));
+	// 	CurrentCharacter->OnPLayerDead.BindUObject(this, &ATDS_PlayerController::OnPlayerDead);
+	// }
 }
 
 void ATDS_PlayerController::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
+	if (!HasAuthority())
+	{
+		
+	}
 	UpdateCharacterRotation();
 }
 
@@ -47,6 +65,37 @@ void ATDS_PlayerController::UpdateCharacterRotation() const
 	if (Result.bBlockingHit)
 	{
 		CurrentCharacter->AddRotation(Result.Location);
+	}
+}
+
+void ATDS_PlayerController::OnPlayerDead()
+{
+	UnPossess();
+
+	FTimerHandle DestroyTimerHandler;
+	GetWorldTimerManager().SetTimer(DestroyTimerHandler, this, &ATDS_PlayerController::Respawn_Implementation, 10.f);
+}
+
+void ATDS_PlayerController::Respawn_Implementation()
+{
+	if (const auto GameMode = Cast<ATDS_GameMode>(UGameplayStatics::GetGameMode(GetWorld())))
+	{
+		const auto NewCharacter = GameMode->CreateCharacter(this);
+		if (!NewCharacter) return;
+
+		Possess(NewCharacter);
+	}
+}
+
+void ATDS_PlayerController::OnPossess(APawn* InPawn)
+{
+	Super::OnPossess(InPawn);
+
+	CurrentCharacter = TScriptInterface<ITDS_Controllable>(GetCharacter());
+	if (CurrentCharacter)
+	{
+		CurrentCharacter->SetPlayerController(this);
+		CurrentCharacter->OnPLayerDead.BindUObject(this, &ATDS_PlayerController::OnPlayerDead);
 	}
 }
 

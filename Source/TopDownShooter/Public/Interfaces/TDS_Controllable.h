@@ -22,4 +22,6 @@ public:
 
 	virtual void SetPlayerController(APlayerController* InController);
 	virtual APlayerController* GetPlayerController();
+
+	FSimpleDelegate OnPLayerDead;
 };

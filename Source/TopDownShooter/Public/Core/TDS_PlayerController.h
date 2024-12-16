@@ -17,6 +17,7 @@ class ATDS_PlayerController : public APlayerController
 
 public:
 	ATDS_PlayerController();
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 protected:
 
@@ -30,6 +31,12 @@ protected:
 	void OnMoveForwardPressed(const FInputActionValue& Input);
 
 	void UpdateCharacterRotation() const;
+	void OnPlayerDead();
+
+	UFUNCTION(Server, Unreliable)
+	void Respawn();
+
+	virtual void OnPossess(APawn* InPawn) override;
 
 public:
 
@@ -46,5 +53,6 @@ public:
 
 private:
 
-	ITDS_Controllable* CurrentCharacter = nullptr;
+	UPROPERTY(Replicated)
+	TScriptInterface<ITDS_Controllable> CurrentCharacter = nullptr;
 };

@@ -26,6 +26,8 @@ public:
 	
 	virtual void OnReloadPressed() override;
 
+	virtual void Detach() override;
+
 protected:
 
 	void StartFire();
@@ -48,7 +50,7 @@ protected:
 public:
 
 	UPROPERTY(EditDefaultsOnly)
-	TEnumAsByte<ECollisionChannel> CollisionChannel;
+	TEnumAsByte<ECollisionChannel> ShootCollisionChannel;
 
 protected:
 	

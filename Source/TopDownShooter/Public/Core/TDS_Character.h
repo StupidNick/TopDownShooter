@@ -41,7 +41,12 @@ private:
 	void Initialize();
 
 	UFUNCTION(Server, Reliable)
-	void OnPlayerDead();
+	void OnPlayerDeadOnServer();
+	UFUNCTION(NetMulticast, Reliable)
+	void OnPlayerDeadOnClient();
+
+	UFUNCTION(Server, Reliable)
+	void DestroyCharacter();
 
 public:
 	UPROPERTY(EditDefaultsOnly, Category = "Camera")
@@ -56,8 +61,14 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Components")
 	UTDS_HealthComponent* HealthComponent;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Common")
+	FCollisionProfileName RagdollCollisionProfileName;
+
 private:
 
 	UPROPERTY(Replicated)
 	APlayerController* CurrentPlayerController;
+
+	UPROPERTY(Replicated)
+	bool bIsAlive = true;
 };

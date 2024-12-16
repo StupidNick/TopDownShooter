@@ -22,4 +22,6 @@ public:
 	virtual void OnRightMouseButtonReleased();
 	
 	virtual void OnReloadPressed();
+
+	virtual void Detach();
 };

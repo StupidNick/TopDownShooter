@@ -21,14 +21,15 @@ public:
 	UFUNCTION(Server, Reliable)
 	void AddWeapon(TSubclassOf<ATDS_BaseWeapon> InWeaponClass);
 
-	// UFUNCTION(Server, Reliable)
-	void SetObjectInHand(AActor* InObject);
+	void DetachObjectInHand();
 
 	void OnMousePressed() const;
 	void OnMouseReleased() const;
 
 protected:
 	virtual void BeginPlay() override;
+
+	void SetObjectInHand(AActor* InObject);
 
 public:
 
