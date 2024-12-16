@@ -1,6 +1,7 @@
 #include "TDS_BaseWeapon.h"
 
 #include "TDS_Controllable.h"
+#include "TDS_WeaponInfo.h"
 #include "GameFramework/Character.h"
 #include "Net/UnrealNetwork.h"
 
@@ -34,7 +35,14 @@ bool ATDS_BaseWeapon::CanShoot()
 	{
 		TakeOwnedController();
 	}
-	return Ammo > 0 && bCanShoot;
+	return Ammo > 0 && bCanShoot && !bIsReloading;
+}
+
+bool ATDS_BaseWeapon::CanReload()
+{
+	if (!WeaponInfo) return false;
+	
+	return !bIsReloading && Ammo < WeaponInfo->MaxAmmo;
 }
 
 void ATDS_BaseWeapon::TakeOwnedController()

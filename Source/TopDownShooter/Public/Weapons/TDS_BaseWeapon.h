@@ -24,6 +24,8 @@ protected:
 
 	UFUNCTION()
 	virtual bool CanShoot();
+	UFUNCTION()
+	virtual bool CanReload();
 
 	void TakeOwnedController();
 
@@ -43,6 +45,7 @@ protected:
 	int32 Ammo;
 
 	bool bCanShoot = true;
+	bool bIsReloading = false;
 
 	UPROPERTY(Replicated)
 	APlayerController* OwnedController;

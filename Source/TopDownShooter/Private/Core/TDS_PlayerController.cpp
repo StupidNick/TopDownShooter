@@ -71,6 +71,7 @@ void ATDS_PlayerController::UpdateCharacterRotation() const
 void ATDS_PlayerController::OnPlayerDead()
 {
 	UnPossess();
+	CurrentCharacter = nullptr;
 
 	FTimerHandle DestroyTimerHandler;
 	GetWorldTimerManager().SetTimer(DestroyTimerHandler, this, &ATDS_PlayerController::Respawn_Implementation, 10.f);
@@ -107,7 +108,10 @@ void ATDS_PlayerController::SetupInputComponent()
 	{
 		EnhancedInputComponent->BindAction(MouseClickAction, ETriggerEvent::Started, this, &ATDS_PlayerController::OnMousePressed);
 		EnhancedInputComponent->BindAction(MouseClickAction, ETriggerEvent::Completed, this, &ATDS_PlayerController::OnMouseReleased);
-		EnhancedInputComponent->BindAction(MoveForwardAction, ETriggerEvent::Triggered, this, &ATDS_PlayerController::OnMoveForwardPressed);
+		
+		EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Triggered, this, &ATDS_PlayerController::OnReloadPressed);
+		
+		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ATDS_PlayerController::OnMoveForwardPressed);
 	}
 }
 
@@ -123,6 +127,15 @@ void ATDS_PlayerController::OnMouseReleased()
 	if (!CurrentCharacter) return;
 
 	CurrentCharacter->MouseReleased();
+}
+
+void ATDS_PlayerController::OnReloadPressed()
+{
+	UE_LOG(LogTemp, Error, TEXT("Reload in controller"));
+	if (!CurrentCharacter) return;
+
+	UE_LOG(LogTemp, Error, TEXT("Reload in controller to character"));
+	CurrentCharacter->ReloadPressed();
 }
 
 void ATDS_PlayerController::OnMoveForwardPressed(const FInputActionValue& Input)

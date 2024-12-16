@@ -67,6 +67,14 @@ void UTDS_EquipmentComponent::OnMouseReleased() const
 	ObjectInHands->OnLeftMouseButtonReleased();
 }
 
+void UTDS_EquipmentComponent::OnReloadPressed() const
+{
+	if (!ObjectInHands) return;
+
+	UE_LOG(LogTemp, Error, TEXT("Reload in component"));
+	ObjectInHands->OnReloadPressed();
+}
+
 void UTDS_EquipmentComponent::BeginPlay()
 {
 	Super::BeginPlay();

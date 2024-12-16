@@ -113,6 +113,16 @@ void ATDS_Character::MouseReleased()
 	EquipmentComponent->OnMouseReleased();
 }
 
+void ATDS_Character::ReloadPressed()
+{
+	ITDS_Controllable::ReloadPressed();
+
+	if (!EquipmentComponent) return;
+
+	UE_LOG(LogTemp, Error, TEXT("Reload in character"));
+	EquipmentComponent->OnReloadPressed();
+}
+
 UCameraComponent* ATDS_Character::GetCamera() const 
 {
 	return TopDownCameraComponent;

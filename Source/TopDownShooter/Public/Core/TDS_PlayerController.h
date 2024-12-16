@@ -28,6 +28,9 @@ protected:
 
 	void OnMousePressed();
 	void OnMouseReleased();
+	
+	void OnReloadPressed();
+	
 	void OnMoveForwardPressed(const FInputActionValue& Input);
 
 	void UpdateCharacterRotation() const;
@@ -46,7 +49,10 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	UInputAction* MouseClickAction;
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
-	UInputAction* MoveForwardAction;
+	UInputAction* ReloadAction;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	UInputAction* MoveAction;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	TEnumAsByte<ECollisionChannel> MouseTraceChanel;

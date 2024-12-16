@@ -48,6 +48,8 @@ void ATDS_AutoRifle::OnRightMouseButtonReleased()
 void ATDS_AutoRifle::OnReloadPressed()
 {
 	ITDS_Usable::OnReloadPressed();
+
+	StartReloadOnServer();
 }
 
 void ATDS_AutoRifle::Detach()
@@ -127,4 +129,30 @@ void ATDS_AutoRifle::FireAgainOnServer_Implementation()
 void ATDS_AutoRifle::StopFireOnServer_Implementation()
 {
 	bIsFiring = false;
+}
+
+void ATDS_AutoRifle::StartReloadOnServer_Implementation()
+{
+	UE_LOG(LogTemp, Error, TEXT("Reload in weapon"));
+	if (!CanReload()) return;
+
+	bIsFiring = false;
+	bCanShoot = false;
+
+	UE_LOG(LogTemp, Error, TEXT("Start reload, ammo: %i"), Ammo);
+
+	GetWorldTimerManager().SetTimer(FullReloadTimerHandle, this, &ATDS_AutoRifle::FinishReloadOnServer, WeaponInfo->ReloadTime);
+}
+
+void ATDS_AutoRifle::FinishReloadOnServer_Implementation()
+{
+	if (!WeaponInfo) return;
+	
+	Ammo = WeaponInfo->MaxAmmo;
+	if (WeaponInfo->bOneInChamber)
+	{
+		Ammo++;
+	}
+	bCanShoot = true;
+	UE_LOG(LogTemp, Error, TEXT("Finish reload, ammo: %i"), Ammo);
 }

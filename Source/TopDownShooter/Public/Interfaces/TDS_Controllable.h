@@ -17,6 +17,8 @@ class TOPDOWNSHOOTER_API ITDS_Controllable
 public:
 	virtual void MousePressed();
 	virtual void MouseReleased();
+	virtual void ReloadPressed();
+	
 	virtual void AddMove(FVector2d& InDirection);
 	virtual void AddRotation(const FVector& InTargetLocation);
 

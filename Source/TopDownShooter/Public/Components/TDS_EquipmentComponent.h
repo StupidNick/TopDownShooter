@@ -26,6 +26,8 @@ public:
 	void OnMousePressed() const;
 	void OnMouseReleased() const;
 
+	void OnReloadPressed() const;
+
 protected:
 	virtual void BeginPlay() override;
 

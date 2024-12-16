@@ -43,6 +43,11 @@ protected:
 	UFUNCTION(Server, Reliable)
 	void FireAgainOnServer();
 
+	UFUNCTION(Server, Reliable)
+	void StartReloadOnServer();
+	UFUNCTION(Server, Reliable)
+	void FinishReloadOnServer();
+
 	// Debug
 	UFUNCTION(NetMulticast, Reliable)
 	void DrawDebugFire(const FVector& InStartLocation, const FVector& InEndLocation);
@@ -55,6 +60,7 @@ public:
 protected:
 	
 	FTimerHandle ReloadBetweenShotsTimerHandle;
+	FTimerHandle FullReloadTimerHandle;
 	
 	bool bIsFiring = false;
 };

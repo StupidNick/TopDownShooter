@@ -26,8 +26,10 @@ public:
 	virtual void AddMove(FVector2d& InDirection) override;
 	UFUNCTION(Server, Unreliable)
 	virtual void AddRotation(const FVector& InTargetLocation) override;
+	
 	virtual void MousePressed() override;
 	virtual void MouseReleased() override;
+	virtual void ReloadPressed() override;
 	// end
 
 	UCameraComponent* GetCamera() const;
