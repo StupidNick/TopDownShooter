@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "TDS_Character.h"
+#include "TDS_GameHUD.h"
 #include "GameFramework/PlayerController.h"
 #include "TDS_PlayerController.generated.h"
 
@@ -40,8 +41,27 @@ protected:
 	void Respawn();
 
 	virtual void OnPossess(APawn* InPawn) override;
+	UFUNCTION()
+	void OnRep_CurrentCharacter();
+
+	UFUNCTION(Client, Reliable)
+	void OnHealthChanged(float InHealth);
+	UFUNCTION(Client, Reliable)
+	void OnAmmoChanged(float InAmmo);
+	UFUNCTION(Client, Reliable)
+	void OnObjectInHandsChanged(const TScriptInterface<ITDS_Usable>& InObject);
+
+	void OnEscapePressed();
 
 public:
+
+	FFloatDelegate OnHealthChangedEvent;
+	FFloatDelegate OnAmmoChangedEvent;
+	
+	FFloatDelegate OnWeaponInitializeEvent;
+	FFloatDelegate OnHealthInitializeEvent;
+
+	FUsableDelegate OnObjectInHandsChangedEvent;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	UInputMappingContext* DefaultMappingContext;
@@ -55,10 +75,16 @@ public:
 	UInputAction* MoveAction;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	UInputAction* EscapeAction;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	TEnumAsByte<ECollisionChannel> MouseTraceChanel;
 
 private:
 
-	UPROPERTY(Replicated)
+	UPROPERTY(ReplicatedUsing=OnRep_CurrentCharacter)
 	TScriptInterface<ITDS_Controllable> CurrentCharacter = nullptr;
+
+	UPROPERTY()
+	ATDS_GameHUD* HUD;
 };

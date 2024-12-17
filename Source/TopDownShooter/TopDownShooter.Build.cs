@@ -23,6 +23,7 @@ public class TopDownShooter : ModuleRules
         PrivateDependencyModuleNames.AddRange(new string[]
         {
 	        "Slate",
+	        "SlateCore",
         });
 	
         PublicIncludePaths.AddRange(new string[]
@@ -32,6 +33,10 @@ public class TopDownShooter : ModuleRules
 	        "TopDownShooter/Public/Components",
 	        "TopDownShooter/Public/Weapons",
 	        "TopDownShooter/Public/Data",
+	        "TopDownShooter/Public/Widgets",
+	        "TopDownShooter/Public/Widgets/Service",
+	        "TopDownShooter/Public/Service",
+	        "TopDownShooter/Public/Widgets/Menus",
         });
     }
 }

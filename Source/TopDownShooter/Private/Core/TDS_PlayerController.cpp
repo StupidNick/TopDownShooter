@@ -8,6 +8,7 @@
 #include "Net/UnrealNetwork.h"
 
 
+
 ATDS_PlayerController::ATDS_PlayerController()
 {
 	bShowMouseCursor = true;
@@ -24,31 +25,17 @@ void ATDS_PlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 void ATDS_PlayerController::BeginPlay()
 {
 	Super::BeginPlay();
-	
 
 	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
 	{
 		Subsystem->AddMappingContext(DefaultMappingContext, 0);
 	}
-	UE_LOG(LogTemp, Warning, TEXT("BeginPlay"));
-	// CurrentCharacter = Cast<ITDS_Controllable>(GetCharacter());
-	// UE_LOG(LogTemp, Error, TEXT("Current character: %s"), GetCharacter());
-	// if (CurrentCharacter)
-	// {
-	// 	CurrentCharacter->SetPlayerController(this);
-	// 	UE_LOG(LogTemp, Error, TEXT("Subscribe on event PC"));
-	// 	CurrentCharacter->OnPLayerDead.BindUObject(this, &ATDS_PlayerController::OnPlayerDead);
-	// }
 }
 
 void ATDS_PlayerController::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	if (!HasAuthority())
-	{
-		
-	}
 	UpdateCharacterRotation();
 }
 
@@ -74,7 +61,7 @@ void ATDS_PlayerController::OnPlayerDead()
 	CurrentCharacter = nullptr;
 
 	FTimerHandle DestroyTimerHandler;
-	GetWorldTimerManager().SetTimer(DestroyTimerHandler, this, &ATDS_PlayerController::Respawn_Implementation, 10.f);
+	GetWorldTimerManager().SetTimer(DestroyTimerHandler, this, &ATDS_PlayerController::Respawn_Implementation, 2.f);
 }
 
 void ATDS_PlayerController::Respawn_Implementation()
@@ -97,7 +84,45 @@ void ATDS_PlayerController::OnPossess(APawn* InPawn)
 	{
 		CurrentCharacter->SetPlayerController(this);
 		CurrentCharacter->OnPLayerDead.BindUObject(this, &ATDS_PlayerController::OnPlayerDead);
+		CurrentCharacter->OnHealthChanged.AddUObject(this, &ATDS_PlayerController::OnHealthChanged);
+		CurrentCharacter->OnAmmoChanged.AddUObject(this, &ATDS_PlayerController::OnAmmoChanged);
 	}
+}
+
+void ATDS_PlayerController::OnRep_CurrentCharacter()
+{
+	if (!CurrentCharacter)
+	{
+		if (HUD)
+		{
+			HUD->RemoveMainWidget();
+		}
+		return;
+	}
+	
+	HUD = Cast<ATDS_GameHUD>(GetHUD());
+	if (!HUD) return;
+
+	HUD->Initialize(this);
+	HUD->CreateMainWidget();
+	
+	CurrentCharacter->OnObjectInHandsChanged.AddUObject(this, &ATDS_PlayerController::OnObjectInHandsChanged);
+	CurrentCharacter->Initialize();
+}
+
+void ATDS_PlayerController::OnObjectInHandsChanged_Implementation(const TScriptInterface<ITDS_Usable>& InObject)
+{
+	OnObjectInHandsChangedEvent.Broadcast(InObject);
+}
+
+void ATDS_PlayerController::OnHealthChanged_Implementation(float InHealth)
+{
+	OnHealthChangedEvent.Broadcast(InHealth);
+}
+
+void ATDS_PlayerController::OnAmmoChanged_Implementation(float InAmmo)
+{
+	OnAmmoChangedEvent.Broadcast(InAmmo);
 }
 
 void ATDS_PlayerController::SetupInputComponent()
@@ -112,6 +137,8 @@ void ATDS_PlayerController::SetupInputComponent()
 		EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Triggered, this, &ATDS_PlayerController::OnReloadPressed);
 		
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ATDS_PlayerController::OnMoveForwardPressed);
+		
+		EnhancedInputComponent->BindAction(EscapeAction, ETriggerEvent::Triggered, this, &ATDS_PlayerController::OnEscapePressed);
 	}
 }
 
@@ -131,10 +158,8 @@ void ATDS_PlayerController::OnMouseReleased()
 
 void ATDS_PlayerController::OnReloadPressed()
 {
-	UE_LOG(LogTemp, Error, TEXT("Reload in controller"));
 	if (!CurrentCharacter) return;
 
-	UE_LOG(LogTemp, Error, TEXT("Reload in controller to character"));
 	CurrentCharacter->ReloadPressed();
 }
 
@@ -144,4 +169,11 @@ void ATDS_PlayerController::OnMoveForwardPressed(const FInputActionValue& Input)
 	
 	FVector2d MovingVector = Input.Get<FVector2d>();
 	CurrentCharacter->AddMove(MovingVector);
+}
+
+void ATDS_PlayerController::OnEscapePressed()
+{
+	if (!HUD) return;
+
+	HUD->CreatePauseMenuWidget();
 }

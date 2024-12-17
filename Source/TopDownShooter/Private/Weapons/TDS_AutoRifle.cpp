@@ -59,6 +59,16 @@ void ATDS_AutoRifle::Detach()
 	DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 }
 
+bool ATDS_AutoRifle::NeedAmmoCounter()
+{
+	return true;
+}
+
+int32 ATDS_AutoRifle::GetAmmo()
+{
+	return Ammo;
+}
+
 void ATDS_AutoRifle::StartFire()
 {
 	if (!CanShoot()) return;
@@ -102,6 +112,7 @@ void ATDS_AutoRifle::FireOnServer_Implementation(FVector InTargetLocation)
 	
 	bCanShoot = false;
 	Ammo--;
+	OnAmmoChangedEvent.Broadcast(Ammo);
 	GetWorldTimerManager().SetTimer(ReloadBetweenShotsTimerHandle, this, &ATDS_AutoRifle::FireAgainOnServer, WeaponInfo->TimeBetweenShots);
 
 	for (auto HitResult : Result)
@@ -133,7 +144,6 @@ void ATDS_AutoRifle::StopFireOnServer_Implementation()
 
 void ATDS_AutoRifle::StartReloadOnServer_Implementation()
 {
-	UE_LOG(LogTemp, Error, TEXT("Reload in weapon"));
 	if (!CanReload()) return;
 
 	bIsFiring = false;
@@ -153,6 +163,7 @@ void ATDS_AutoRifle::FinishReloadOnServer_Implementation()
 	{
 		Ammo++;
 	}
+	OnAmmoChangedEvent.Broadcast(Ammo);
 	bCanShoot = true;
 	UE_LOG(LogTemp, Error, TEXT("Finish reload, ammo: %i"), Ammo);
 }

@@ -58,6 +58,10 @@ void ATDS_BaseWeapon::TakeOwnedController()
 	}
 }
 
+void ATDS_BaseWeapon::OnRep_AmmoChanged()
+{
+}
+
 void ATDS_BaseWeapon::Initialize_Implementation()
 {
 	

@@ -28,6 +28,9 @@ public:
 
 	virtual void Detach() override;
 
+	virtual bool NeedAmmoCounter();
+	virtual int32 GetAmmo();
+
 protected:
 
 	void StartFire();

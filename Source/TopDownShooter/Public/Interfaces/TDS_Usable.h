@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "Types.h"
 #include "UObject/Interface.h"
 #include "TDS_Usable.generated.h"
 
@@ -24,4 +25,9 @@ public:
 	virtual void OnReloadPressed();
 
 	virtual void Detach();
+
+	virtual bool NeedAmmoCounter();
+	virtual int32 GetAmmo();
+
+	FFloatDelegate OnAmmoChangedEvent;
 };

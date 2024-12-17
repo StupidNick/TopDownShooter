@@ -40,7 +40,10 @@ public:
 
 private:
 
-	void Initialize();
+	UFUNCTION(Server, Reliable)
+	virtual void Initialize() override;
+	UFUNCTION(Client, Reliable)
+	void InitializeOnClient();
 
 	UFUNCTION(Server, Reliable)
 	void OnPlayerDeadOnServer();
@@ -51,6 +54,7 @@ private:
 	void DestroyCharacter();
 
 public:
+	
 	UPROPERTY(EditDefaultsOnly, Category = "Camera")
 	UCameraComponent* TopDownCameraComponent;
 
