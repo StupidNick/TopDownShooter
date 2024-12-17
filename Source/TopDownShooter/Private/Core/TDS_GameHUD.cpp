@@ -1,7 +1,8 @@
 #include "TDS_GameHUD.h"
 #include "TDS_MainHUDWD.h"
+#include "TDS_PauseMenuWD.h"
 #include "TDS_PlayerController.h"
-
+#include "Kismet/KismetSystemLibrary.h"
 
 
 void ATDS_GameHUD::Initialize(ATDS_PlayerController* InPlayerController)
@@ -36,4 +37,38 @@ void ATDS_GameHUD::RemoveMainWidget()
 
 	MainWidget->RemoveFromParent();
 	MainWidget = nullptr;
+}
+
+void ATDS_GameHUD::CreatePauseMenuWidget()
+{
+	if (!PauseMenuWidgetClass) return;
+	if (PauseMenuWidget)
+	{
+		RemovePauseMenuWidget();
+		return;
+	}
+
+	PauseMenuWidget = CreateWidget<UTDS_PauseMenuWD>(GetWorld(), PauseMenuWidgetClass);
+	if (!PauseMenuWidget) return;
+
+	PauseMenuWidget->ContinueGameEvent.BindLambda([&]()
+	{
+		RemovePauseMenuWidget();
+	});
+	PauseMenuWidget->ExitGameEvent.BindLambda([&]()
+	{
+		if (!PlayerController) return;
+		
+		UKismetSystemLibrary::QuitGame(GetWorld(), PlayerController, EQuitPreference::Quit, true);
+	});
+	
+	PauseMenuWidget->AddToViewport();
+}
+
+void ATDS_GameHUD::RemovePauseMenuWidget()
+{
+	if (!PauseMenuWidget) return;
+
+	PauseMenuWidget->RemoveFromParent();
+	PauseMenuWidget = nullptr;
 }

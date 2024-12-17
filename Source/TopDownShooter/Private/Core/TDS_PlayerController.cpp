@@ -137,6 +137,8 @@ void ATDS_PlayerController::SetupInputComponent()
 		EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Triggered, this, &ATDS_PlayerController::OnReloadPressed);
 		
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ATDS_PlayerController::OnMoveForwardPressed);
+		
+		EnhancedInputComponent->BindAction(EscapeAction, ETriggerEvent::Triggered, this, &ATDS_PlayerController::OnEscapePressed);
 	}
 }
 
@@ -167,4 +169,11 @@ void ATDS_PlayerController::OnMoveForwardPressed(const FInputActionValue& Input)
 	
 	FVector2d MovingVector = Input.Get<FVector2d>();
 	CurrentCharacter->AddMove(MovingVector);
+}
+
+void ATDS_PlayerController::OnEscapePressed()
+{
+	if (!HUD) return;
+
+	HUD->CreatePauseMenuWidget();
 }

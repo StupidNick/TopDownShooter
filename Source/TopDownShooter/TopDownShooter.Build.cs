@@ -36,6 +36,7 @@ public class TopDownShooter : ModuleRules
 	        "TopDownShooter/Public/Widgets",
 	        "TopDownShooter/Public/Widgets/Service",
 	        "TopDownShooter/Public/Service",
+	        "TopDownShooter/Public/Widgets/Menus",
         });
     }
 }

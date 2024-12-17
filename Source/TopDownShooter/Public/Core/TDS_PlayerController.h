@@ -51,6 +51,8 @@ protected:
 	UFUNCTION(Client, Reliable)
 	void OnObjectInHandsChanged(const TScriptInterface<ITDS_Usable>& InObject);
 
+	void OnEscapePressed();
+
 public:
 
 	FFloatDelegate OnHealthChangedEvent;
@@ -71,6 +73,9 @@ public:
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	UInputAction* MoveAction;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	UInputAction* EscapeAction;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	TEnumAsByte<ECollisionChannel> MouseTraceChanel;
