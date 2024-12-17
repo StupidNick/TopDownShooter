@@ -1,9 +1,9 @@
 #include "TDS_EquipmentComponent.h"
-
 #include "TDS_BaseWeapon.h"
 #include "TDS_Character.h"
 #include "TDS_Usable.h"
 #include "Net/UnrealNetwork.h"
+
 
 
 UTDS_EquipmentComponent::UTDS_EquipmentComponent()
@@ -37,6 +37,11 @@ void UTDS_EquipmentComponent::SetObjectInHand(AActor* InObject)
 	if (InObject->Implements<UTDS_Usable>())
 	{
 		ObjectInHands = TScriptInterface<ITDS_Usable>(InObject);
+		ObjectInHands->OnAmmoChangedEvent.AddLambda([&](float InAmmo)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Set new Ammo"));
+			OnAmmoChangedEvent.Broadcast(InAmmo);
+		});
 	}
 	if (const auto Character = Cast<ACharacter>(GetOwner()))
 	{
@@ -44,6 +49,11 @@ void UTDS_EquipmentComponent::SetObjectInHand(AActor* InObject)
 		InObject->SetActorRelativeLocation(FVector(0.f, 0.f, 0.f));
 		InObject->SetActorRotation(FRotator::ZeroRotator);
 	}
+}
+
+void UTDS_EquipmentComponent::OnRep_ObjectInHands()
+{
+	OnObjectInHandsChangedDelegate.Broadcast(ObjectInHands);
 }
 
 void UTDS_EquipmentComponent::DetachObjectInHand()
@@ -71,16 +81,5 @@ void UTDS_EquipmentComponent::OnReloadPressed() const
 {
 	if (!ObjectInHands) return;
 
-	UE_LOG(LogTemp, Error, TEXT("Reload in component"));
 	ObjectInHands->OnReloadPressed();
-}
-
-void UTDS_EquipmentComponent::BeginPlay()
-{
-	Super::BeginPlay();
-
-	if (GetOwner()->HasAuthority())
-	{
-		AddWeapon(DefaultWeapon);
-	}
 }

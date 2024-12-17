@@ -1,6 +1,7 @@
 ﻿#include "TDS_Controllable.h"
 
 
+void ITDS_Controllable::Initialize(){}
 
 void ITDS_Controllable::MousePressed(){}
 void ITDS_Controllable::MouseReleased(){}

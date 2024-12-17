@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "Types.h"
 #include "UObject/Interface.h"
 #include "TDS_Controllable.generated.h"
 
@@ -15,6 +16,9 @@ class TOPDOWNSHOOTER_API ITDS_Controllable
 	GENERATED_BODY()
 
 public:
+
+	virtual void Initialize();
+	
 	virtual void MousePressed();
 	virtual void MouseReleased();
 	virtual void ReloadPressed();
@@ -26,4 +30,9 @@ public:
 	virtual APlayerController* GetPlayerController();
 
 	FSimpleDelegate OnPLayerDead;
+	
+	FFloatDelegate OnHealthChanged;
+	FFloatDelegate OnAmmoChanged;
+	
+	FUsableDelegate OnObjectInHandsChanged;
 };

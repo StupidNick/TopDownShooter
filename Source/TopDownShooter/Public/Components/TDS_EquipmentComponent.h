@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Types.h"
 #include "TDS_EquipmentComponent.generated.h"
 
 
@@ -29,11 +30,16 @@ public:
 	void OnReloadPressed() const;
 
 protected:
-	virtual void BeginPlay() override;
 
 	void SetObjectInHand(AActor* InObject);
 
+	UFUNCTION()
+	void OnRep_ObjectInHands();
+
 public:
+
+	FFloatDelegate OnAmmoChangedEvent;
+	FUsableDelegate OnObjectInHandsChangedDelegate;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	FName WeaponSocketName;
@@ -41,6 +47,6 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	TSubclassOf<ATDS_BaseWeapon> DefaultWeapon;
 
-	UPROPERTY(Replicated)
+	UPROPERTY(ReplicatedUsing=OnRep_ObjectInHands)
 	TScriptInterface<ITDS_Usable> ObjectInHands = nullptr;
 };

@@ -9,6 +9,7 @@
 #include "Net/UnrealNetwork.h"
 
 
+
 ATDS_Character::ATDS_Character()
 {
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
@@ -45,8 +46,6 @@ ATDS_Character::ATDS_Character()
 void ATDS_Character::BeginPlay()
 {
 	Super::BeginPlay();
-
-	Initialize();
 }
 
 void ATDS_Character::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -119,7 +118,6 @@ void ATDS_Character::ReloadPressed()
 
 	if (!EquipmentComponent) return;
 
-	UE_LOG(LogTemp, Error, TEXT("Reload in character"));
 	EquipmentComponent->OnReloadPressed();
 }
 
@@ -138,12 +136,34 @@ APlayerController* ATDS_Character::GetPlayerController()
 	return CurrentPlayerController;
 }
 
-void ATDS_Character::Initialize()
+void ATDS_Character::Initialize_Implementation()
 {
 	if (HealthComponent)
 	{
+		HealthComponent->OnHealthChangedEvent.AddLambda([&](float InHealth)
+		{
+			OnHealthChanged.Broadcast(InHealth);
+		});
 		HealthComponent->OnDead.BindUObject(this, &ATDS_Character::OnPlayerDeadOnServer_Implementation);
+		HealthComponent->Initialize();
 	}
+	if (EquipmentComponent)
+	{
+		EquipmentComponent->OnAmmoChangedEvent.AddLambda([&](float InAmmo)
+		{
+			OnAmmoChanged.Broadcast(InAmmo);
+		});
+		InitializeOnClient();
+		EquipmentComponent->AddWeapon(EquipmentComponent->DefaultWeapon);
+	}
+}
+
+void ATDS_Character::InitializeOnClient_Implementation()
+{
+	EquipmentComponent->OnObjectInHandsChangedDelegate.AddLambda([&](const TScriptInterface<ITDS_Usable>& InObject)
+	{
+		OnObjectInHandsChanged.Broadcast(InObject);
+	});
 }
 
 void ATDS_Character::OnPlayerDeadOnServer_Implementation()

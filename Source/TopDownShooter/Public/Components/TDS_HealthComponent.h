@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Service/Types.h"
 #include "TDS_HealthComponent.generated.h"
 
 
@@ -15,6 +16,9 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	UFUNCTION(Server, Reliable)
+	void Initialize();
+
+	UFUNCTION(Server, Reliable)
 	void SetHealth(float InHealth);
 	UFUNCTION(Server, Reliable)
 	void TakeDamage(float InDamage);
@@ -22,21 +26,21 @@ public:
 	UFUNCTION(Server, Reliable)
 	void Death();
 
+	float GetHealth();
+
 protected:
 	virtual void BeginPlay() override;
-
-	UFUNCTION()
-	void OnRep_Health();
 
 public:
 	
 	FSimpleDelegate OnDead;
+	FFloatDelegate OnHealthChangedEvent;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Health")
 	float BaseHealth;
 
 private:
 
-	UPROPERTY(ReplicatedUsing=OnRep_Health)
+	UPROPERTY(Replicated)
 	float Health;
 };

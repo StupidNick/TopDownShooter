@@ -29,6 +29,9 @@ protected:
 
 	void TakeOwnedController();
 
+	UFUNCTION()
+	virtual void OnRep_AmmoChanged();
+
 public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Base Info")
@@ -41,7 +44,7 @@ public:
 	USkeletalMeshComponent* Mesh;
 protected:
 
-	UPROPERTY(Replicated)
+	UPROPERTY(ReplicatedUsing=OnRep_AmmoChanged)
 	int32 Ammo;
 
 	bool bCanShoot = true;
